@@ -1,6 +1,7 @@
 #include<xc.h>           // processor SFR definitions
 #include<sys/attribs.h>  // __ISR macro
 #include<math.h>
+#include <stdio.h>
 #include "ILI9163C.h"
 // DEVCFG0
 #pragma config DEBUG = OFF // no debugging
@@ -50,9 +51,39 @@ void display_character(char c, unsigned short row, unsigned short col, unsigned 
     }
 }
 
+void display_multiline_string(char msg[], unsigned short row, unsigned short col, unsigned short xGap, unsigned short yGap, unsigned short color){
+    int i = 0;
+    while (msg[i]){
+        if (msg[i] == '\n'){
+            row += yGap;
+        }
+        else if (msg[i] == '\t'){
+            col += 4 * xGap;
+        }
+        else{
+            display_character(msg[i], row, col, color);
+            col += xGap;
+        }
+        ++i;
+    }
+}
+void display_string(char msg[], unsigned short row, unsigned short col, unsigned short color){
+    int i = 0;
+    unsigned short xGap = 5;
+    while (msg[i]){
+        display_character(msg[i], row, col, color);
+        col += xGap;
+        ++i;
+    }
+}
+
+
 int main() {
     SPI1_init();
     LCD_init();
     LCD_clearScreen(BLACK);
     display_character('h', 20, 10, WHITE);
+    char message[100];
+    sprintf(message, "Hi Daniel");
+    display_string(message, 40, 40, WHITE);
 }
