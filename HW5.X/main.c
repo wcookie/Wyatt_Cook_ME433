@@ -46,7 +46,7 @@ void initExpander(){
   i2c_master_setup();                       // init I2C2, which we use as a master
   __builtin_enable_interrupts(); 
   
-    char num = 0x11110000;
+    char num = 0b11110000;
     i2c_master_start();
     i2c_master_send(SLAVE_ADDR<<1);
     i2c_master_send(0x0);
@@ -79,10 +79,7 @@ char getExpander(){
 int main() {                    // buffer for sending messages to the user
 
     initExpander();
-    setExpander(0, 0);
-    setExpander(7, 1);
     
-
     while (1){
         char temp = getExpander();
         char bit7 = temp >> 7;
