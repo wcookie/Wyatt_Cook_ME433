@@ -3,6 +3,8 @@
 // Change I2C1 to the I2C channel you are using
 // I2C pins need pull-up resistors, 2k-10k
 
+#include "i2c_master_noint.h"
+#include <xc.h>
 void i2c_master_setup(void) {
   I2C2BRG = 0x1000;            // I2CBRG = [1/(2*Fsck) - PGD]*Pblck - 2 
                                     // look up PGD for your PIC32

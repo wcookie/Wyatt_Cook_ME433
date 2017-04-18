@@ -2,7 +2,6 @@
 #define I2C_MASTER_NOINT_H__
 // Header file for i2c_master_noint.c
 // helps implement use I2C1 as a master without using interrupts
-
 void i2c_master_setup(void);              // set up I2C 1 as a master, at 100 kHz
 
 void i2c_master_start(void);              // send a START signal
