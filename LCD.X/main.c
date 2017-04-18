@@ -77,13 +77,57 @@ void display_string(char msg[], unsigned short row, unsigned short col, unsigned
     }
 }
 
+void draw_bar(unsigned short startPos, unsigned short length, unsigned short row, unsigned short color){
+    for (startPos; startPos < startPos + length; ++startPos){
+        LCD_drawPixel(startPos, row, color);
+    }
+}
 
 int main() {
     SPI1_init();
     LCD_init();
     LCD_clearScreen(BLACK);
-    display_character('h', 20, 10, WHITE);
+    //display_character('h', 20, 10, WHITE);
     char message[100];
-    sprintf(message, "Hi Daniel");
+    //sprintf(message, "Hi Daniel");
     display_string(message, 40, 40, WHITE);
+    unsigned short barStart = 0;
+    unsigned short barLength = 50;
+    unsigned short direction = 1;
+    int integer = 0;
+    
+    while (1){
+        sprintf(message, "Helo World! %d", integer);
+        display_string(message, 32, 28, MAGENTA);
+        draw_bar(0, barStart, 10, BLACK);
+        draw_bar(barStart, barStart + barLength, 10, CYAN);
+        draw_bar(barStart + barLength, 100 - barStart + barLength, 10, BLACK);
+        ++integer;
+        if (barStart > 50){
+            if (direction > 0){
+                ++barLength;
+                if (barLength > 50){
+                    direction = -1;
+                }
+            }
+            else{
+                --barLength;
+                if (barLength < 0){
+                    barStart = 50;
+                    barLength = 0;
+                }
+            }
+        }
+        else{
+            if (direction > 0){
+                ++barStart;
+                --barLength;
+            }
+            else{
+                --barStart;
+                ++barLength;
+            }
+    }
+    
+    }
 }
