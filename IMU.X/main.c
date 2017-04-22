@@ -50,10 +50,23 @@ void init_IMU(){
     char CTRL1_XL = 0b10000010;
     char CTRL2_G = 0b1000100;
     char CTRL3_C = 0b00000100;
+    //accelerometer
     i2c_master_start();
     i2c_master_send(SLAVE_ADDR<<1);
-    i2c_master_send(0x0);
-    i2c_master_send();
+    i2c_master_send(0x10);
+    i2c_master_send(CTRL1_XL);
+    i2c_master_stop();
+    //gyro
+    i2c_master_start();
+    i2c_master_send(SLAVE_ADDR<<1);
+    i2c_master_send(0x11);
+    i2c_master_send(CTRL2_G);
+    i2c_master_stop();
+    //multi read
+    i2c_master_start();
+    i2c_master_send(SLAVE_ADDR<<1);
+    i2c_master_send(0x12);
+    i2c_master_send(CTRL3_C);
     i2c_master_stop();
 }
 
