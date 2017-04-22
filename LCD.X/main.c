@@ -111,7 +111,7 @@ int main() {
         int x = 93;
         int y = 32;
         for (y; y < 40; ++ y){
-            for (x; x < 103; ++ x){
+            for (x = 93; x < 108; ++ x){
                 LCD_drawPixel(x, y, BLACK);
             }
         }
