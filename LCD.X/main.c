@@ -108,7 +108,14 @@ int main() {
         }
         _CP0_SET_COUNT(0);
         //draw_bar(0, 128, 10, BLACK);
-        sprintf(message, "Hello World! %d", integer);
+        int x = 93;
+        int y = 32;
+        for (y; y < 40; ++ y){
+            for (x; x < 103; ++ x){
+                LCD_drawPixel(x, y, BLACK);
+            }
+        }
+        sprintf(&message, "Hello World! %d", integer);
         display_string(message, 32, 28, MAGENTA);
         draw_bar(0, integer, 10, CYAN);
         ++integer;
@@ -116,6 +123,8 @@ int main() {
             integer = 0;
             draw_bar(0, 128, 10, BLACK);
         }
+        
+        //65 - 75, 8 high, starting at 32nd row 28th col, so 93 - 103.  
        
    }
 }
