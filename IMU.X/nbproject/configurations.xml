@@ -13,6 +13,12 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>main.c</itemPath>
+      <itemPath>i2c_master_noint.c</itemPath>
+      <itemPath>i2c_master_noint.h</itemPath>
+      <itemPath>ILI9163C.c</itemPath>
+      <itemPath>ILI9163C.h</itemPath>
+      <itemPath>LCD.c</itemPath>
+      <itemPath>LCD.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

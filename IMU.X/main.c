@@ -2,7 +2,8 @@
 #include<sys/attribs.h>  // __ISR macro
 #include<math.h>
 #include <stdio.h>
-#include <i2c_master_noint.h>
+#include "i2c_master_noint.h"
+#include "LCD.h"
 // DEVCFG0
 
 #pragma config DEBUG = OFF // no debugging
@@ -75,8 +76,12 @@ short combineNums(char * data, char index){
     ret |= data[index];
     return ret;
 }
+
 int main(){
     init_IMU();
+    SPI1_init();
+    LCD_init();
+    LCD_clearScreen(BLACK);
     char data[14];
     
     //temp low is at 0x20
@@ -92,14 +97,17 @@ int main(){
     short accel_x;
     short accel_y;
     short accel_z;
-    i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
-    temp = combineNums(data, 0);
-    gyro_x = combineNums(data, 2);
-    gyro_y = combineNums(data, 4);
-    gyro_z = combineNums(data, 6);
-    accel_x = combineNums(data, 8);
-    accel_y = combineNums(data, 10);
-    accel_z = combineNums(data, 12);
+    while(1){
+        i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
+        temp = combineNums(data, 0);
+        gyro_x = combineNums(data, 2);
+        gyro_y = combineNums(data, 4);
+        gyro_z = combineNums(data, 6);
+        accel_x = combineNums(data, 8);
+        accel_y = combineNums(data, 10);
+        accel_z = combineNums(data, 12);
+        
+    }
     
     
 }

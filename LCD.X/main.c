@@ -101,13 +101,10 @@ int main() {
     int integer = 0;
     _CP0_SET_COUNT(0);
     while (1){
-        
-        //LCD_clearScreen(BLACK);
         while(_CP0_GET_COUNT() <= 400000){
             ;
         }
         _CP0_SET_COUNT(0);
-        //draw_bar(0, 128, 10, BLACK);
         int x = 93;
         int y = 32;
         for (y; y < 40; ++ y){
@@ -123,8 +120,7 @@ int main() {
             integer = 0;
             draw_bar(0, 128, 10, BLACK);
         }
-        
-        //65 - 75, 8 high, starting at 32nd row 28th col, so 93 - 103.  
+          
        
    }
 }
