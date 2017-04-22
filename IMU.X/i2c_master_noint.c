@@ -49,20 +49,21 @@ void i2c_master_stop(void) {          // send a STOP:
 
 void i2c_read_multiple(unsigned char address, unsigned char reg, unsigned char * data, int length){
     i2c_master_start();
-    int i = 0;
-    for (i; i < length; ++i){
     i2c_master_send(address << 1);
-    i2c_master_send(reg + i); // 0x20 starts at temp low, goes however long
+    i2c_master_send(reg);
     i2c_master_restart();
     i2c_master_send((address << 1) | 1);
-    char temp = i2c_master_recv();
-    if (i == (length -1)){
-        i2c_master_ack(1);
+    int i = 0;
+    for (i; i < length; ++i){
+        char temp = i2c_master_recv();
+        if (i == (length -1)){
+            i2c_master_ack(1);
+        }
+        else{
+            i2c_master_ack(0);
+        }
+        data[i] = temp;
+
     }
-    else{
-        i2c_master_ack(0);
-    }
-    data[i] = temp;
-    }
-    i2c_master_stop();
+     i2c_master_stop();  
 }

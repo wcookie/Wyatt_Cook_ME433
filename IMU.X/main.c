@@ -45,7 +45,16 @@
 void init_IMU(){
   ANSELBbits.ANSB2 = 0;
   ANSELBbits.ANSB3 = 0;
-  
+   __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
+
+    // 0 data RAM access wait states
+    BMXCONbits.BMXWSDRM = 0x0;
+
+    // enable multi vector interrupts
+    INTCONbits.MVEC = 0x1;
+
+    // disable JTAG to get pins back
+    DDPCONbits.JTAGEN = 0;
   i2c_master_setup();                       // init I2C2, which we use as a master
   __builtin_enable_interrupts(); 
     char CTRL1_XL = 0b10000010;
@@ -97,7 +106,22 @@ int main(){
     short accel_x;
     short accel_y;
     short accel_z;
+    i2c_master_start();
+    i2c_master_send(SLAVE_ADDR << 1);
+    i2c_master_send(0xF);
+    i2c_master_restart();
+    i2c_master_send((SLAVE_ADDR << 1) | 1);
+    char var = i2c_master_recv();
+    i2c_master_ack(1);
+    i2c_master_stop();
+    char message[20];
+    
+    _CP0_SET_COUNT(0);
     while(1){
+        while(_CP0_GET_COUNT() < 40000){
+            ;
+        }
+        _CP0_SET_COUNT(0);
         i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
         temp = combineNums(data, 0);
         gyro_x = combineNums(data, 2);
@@ -106,6 +130,14 @@ int main(){
         accel_x = combineNums(data, 8);
         accel_y = combineNums(data, 10);
         accel_z = combineNums(data, 12);
+        sprintf(message, "gyro: %d", gyro_x);
+        display_string(message, 20, 20, CYAN);
+        int x, y;
+         for (y=20; y < 28; ++ y){
+            for (x = 50; x < 70; ++ x){
+                LCD_drawPixel(x, y, BLACK);
+            }
+        }
         
     }
     
