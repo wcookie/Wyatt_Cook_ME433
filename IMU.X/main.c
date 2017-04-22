@@ -70,6 +70,36 @@ void init_IMU(){
     i2c_master_stop();
 }
 
+short combineNums(char * data, char index){
+    short ret = data[index + 1] << 8;
+    ret |= data[index];
+    return ret;
+}
 int main(){
     init_IMU();
+    char data[14];
+    
+    //temp low is at 0x20
+    //temp low, high
+    //gyro:
+    //x (l,h), y(l,h), z(l,h)
+    //accel:
+    //x (l,h), y(l,h), z(l,h)
+    short temp;
+    short gyro_x;
+    short gyro_y;
+    short gyro_z;
+    short accel_x;
+    short accel_y;
+    short accel_z;
+    i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
+    temp = combineNums(data, 0);
+    gyro_x = combineNums(data, 2);
+    gyro_y = combineNums(data, 4);
+    gyro_z = combineNums(data, 6);
+    accel_x = combineNums(data, 8);
+    accel_y = combineNums(data, 10);
+    accel_z = combineNums(data, 12);
+    
+    
 }
