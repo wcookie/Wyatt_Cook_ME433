@@ -2,9 +2,9 @@
 #include<sys/attribs.h>  // __ISR macro
 #include<math.h>
 #include <stdio.h>
+#include <i2c_master_noint.h>
 // DEVCFG0
 
-#define SLAVE_ADDR 0b1101011
 #pragma config DEBUG = OFF // no debugging
 #pragma config JTAGEN = OFF // no jtag
 #pragma config ICESEL = ICS_PGx1 // use PGED1 and PGEC1
@@ -47,11 +47,16 @@ void init_IMU(){
   
   i2c_master_setup();                       // init I2C2, which we use as a master
   __builtin_enable_interrupts(); 
-  
-    char num = 0b11110000;
+    char CTRL1_XL = 0b10000010;
+    char CTRL2_G = 0b1000100;
+    char CTRL3_C = 0b00000100;
     i2c_master_start();
     i2c_master_send(SLAVE_ADDR<<1);
     i2c_master_send(0x0);
-    i2c_master_send(num);
+    i2c_master_send();
     i2c_master_stop();
+}
+
+int main(){
+    init_IMU();
 }

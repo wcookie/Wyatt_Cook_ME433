@@ -56,9 +56,13 @@ void i2c_read_multiple(unsigned char address, unsigned char reg, unsigned char *
     i2c_master_restart();
     i2c_master_send((address << 1) | 1);
     char temp = i2c_master_recv();
-    i2c_master_ack(0);
+    if (i == (length -1)){
+        i2c_master_ack(1);
+    }
+    else{
+        i2c_master_ack(0);
+    }
     data[i] = temp;
     }
-    i2c_master_ack(1);
     i2c_master_stop();
 }
