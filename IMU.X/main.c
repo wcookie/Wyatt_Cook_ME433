@@ -133,6 +133,16 @@ int main(){
                 LCD_drawPixel(x, y, BLACK);
             }
         }
+         for (y=52; y < 60; ++ y){
+            for (x = 60; x < 100; ++ x){
+                LCD_drawPixel(x, y, BLACK);
+            }
+        }
+         for (y=68; y < 76; ++ y){
+            for (x = 60; x < 100; ++ x){
+                LCD_drawPixel(x, y, BLACK);
+            }
+        }
         i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
         temp = combineNums(data, 0);
         gyro_x = combineNums(data, 2);
