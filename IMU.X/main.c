@@ -157,7 +157,7 @@ int main(){
         display_string(message, 36, 20, CYAN);
         sprintf(message, "gyro x: %d", gyro_x);
         display_string(message, 52, 20, CYAN);
-        sprintf(message, "gyro y: %d:, gyro_y");
+        sprintf(message, "gyro y: %d:", gyro_y);
         display_string(message, 68, 20, CYAN);
         
         
