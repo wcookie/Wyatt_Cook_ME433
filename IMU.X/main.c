@@ -118,10 +118,21 @@ int main(){
     
     _CP0_SET_COUNT(0);
     while(1){
-        while(_CP0_GET_COUNT() < 40000){
+        while(_CP0_GET_COUNT() < 800000){
             ;
         }
         _CP0_SET_COUNT(0);
+        int x, y;
+         for (y=20; y < 28; ++ y){
+            for (x = 60; x < 100; ++ x){
+                LCD_drawPixel(x, y, BLACK);
+            }
+        }
+         for (y=36; y < 44; ++ y){
+            for (x = 60; x < 100; ++ x){
+                LCD_drawPixel(x, y, BLACK);
+            }
+        }
         i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
         temp = combineNums(data, 0);
         gyro_x = combineNums(data, 2);
@@ -130,14 +141,12 @@ int main(){
         accel_x = combineNums(data, 8);
         accel_y = combineNums(data, 10);
         accel_z = combineNums(data, 12);
-        sprintf(message, "gyro: %d", gyro_x);
+        sprintf(message, "accel x: %d", accel_x);
         display_string(message, 20, 20, CYAN);
-        int x, y;
-         for (y=20; y < 28; ++ y){
-            for (x = 50; x < 70; ++ x){
-                LCD_drawPixel(x, y, BLACK);
-            }
-        }
+        sprintf(message, "accel y: %d", accel_y);
+        display_string(message, 36, 20, CYAN);
+        
+        
         
     }
     
