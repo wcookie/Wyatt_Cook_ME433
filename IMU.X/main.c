@@ -118,7 +118,7 @@ int main(){
     
     _CP0_SET_COUNT(0);
     while(1){
-        while(_CP0_GET_COUNT() < 800000){
+        while(_CP0_GET_COUNT() < 400000){
             ;
         }
         _CP0_SET_COUNT(0);
