@@ -206,7 +206,7 @@
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>FE7CAD776A62A0842D05F3BA6A06B13B</Checksum>
+        <Checksum>68F0053D8FEFD8231820A17F867ACE82</Checksum>
       </Template>
       <Template>
         <Name>main.c</Name>
@@ -220,7 +220,7 @@
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>C5F7280FA6A4C6771B1A8344A5C94EBA</Checksum>
+        <Checksum>7DAC3B7C1301190BFE0F1FA3F215F7BB</Checksum>
       </Template>
       <Template>
         <Name>system_definitions.h</Name>
