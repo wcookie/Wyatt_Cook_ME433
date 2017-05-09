@@ -20,6 +20,7 @@
         </logicalFolder>
         <itemPath>../src/app.h</itemPath>
         <itemPath>../../../HW9/firmware/src/i2c_master_noint.h</itemPath>
+        <itemPath>../src/mouse.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f5" displayName="driver" projectFiles="true">
@@ -135,6 +136,7 @@
         <itemPath>../src/app.c</itemPath>
         <itemPath>../src/main.c</itemPath>
         <itemPath>../../../HW9/firmware/src/i2c_master_noint.c</itemPath>
+        <itemPath>../src/mouse.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f2" displayName="driver" projectFiles="true">
