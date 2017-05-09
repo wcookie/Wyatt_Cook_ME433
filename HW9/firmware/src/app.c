@@ -521,7 +521,7 @@ void APP_Tasks(void) {
                     while(_CP0_GET_COUNT() < 10000){
                     ;
                     }  
-                    len = sprintf(dataOut, "%d %h %h %h %h %h %h \r\n", counter, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z);
+                    len = sprintf(dataOut, "%d %d %d %d %d %d %d \r\n", counter, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z);
                     USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
                         dataOut, len,
@@ -532,8 +532,9 @@ void APP_Tasks(void) {
                 
             } else {
                 dataOut[0] = 0;
+                len = 1;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
-                        &appData.writeTransferHandle, dataOut, 1,
+                        &appData.writeTransferHandle, dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                 startTime = _CP0_GET_COUNT();
             }
