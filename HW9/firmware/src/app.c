@@ -498,21 +498,7 @@ void APP_Tasks(void) {
 
             /* Setup the write */
              //appData.readBuffer is the char
-            if (appData.readBuffer == 'r'){
-                i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
-                temp = combineNums(data, 0);
-                gyro_x = combineNums(data, 2);
-                gyro_y = combineNums(data, 4);
-                gyro_z = combineNums(data, 6);
-                accel_x = combineNums(data, 8);
-                accel_y = combineNums(data, 10);
-                accel_z = combineNums(data, 12);
-                for (int i = 0; i < 100; ++i){
-                   while(_CP0_GET_COUNT() < 10000){
-                    ;
-                    }  
-                }  
-            }
+           
             appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
             appData.isWriteComplete = false;
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
@@ -522,7 +508,7 @@ void APP_Tasks(void) {
             char message[50];
             int counter;
             if (appData.isReadComplete) {
-                if (*appData.readBuffer == 'r'){
+                if (appData.readBuffer[0] == 'r'){
 
                 for (counter = 0; counter < 100; ++counter){
                     i2c_read_multiple(SLAVE_ADDR, 0x20, data, 14);
