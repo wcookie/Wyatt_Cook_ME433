@@ -506,6 +506,7 @@ void APP_Tasks(void) {
            
             char message[50];
             int counter;
+            int read_index = 0;
             if (appData.isReadComplete) {
                 if (appData.readBuffer[0] == 'r'){
 
