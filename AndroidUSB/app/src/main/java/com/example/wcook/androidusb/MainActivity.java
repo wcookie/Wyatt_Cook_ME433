@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 } catch (IOException e) { }
             }
         });
-        myControl.setMax(255);
+        myControl.setMax(100); // maybe 255 is better? consider changing
         manager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
         Log.w("Myapp", "After USB manager ");
@@ -191,7 +191,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         // every time there is a new Camera preview frame
         mTextureView.getBitmap(bmp);
-
+        float xMiddle = 0;
+        float yMiddle = 0;
+        int numPixels = 0;
         Log.w("Myapp", "Starting on Surface texture updated ");
         final Canvas c = mSurfaceHolder.lockCanvas();
         if (c != null) {
@@ -201,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             int rowGap = 7; // how many rowth to be at
             int colGap = 2;
             // really should do like 0 to bmp.getHeight() at some point, but would probably have to raise row gap
+
             for(int startY = 0; startY < bmp.getHeight(); startY += rowGap) {
                 bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
 
@@ -214,8 +217,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     //if ((green(pixels[i]) - red(pixels[i])) > thresh) {
                     if (sum <= thresh){
                         pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
+                        xMiddle += i;
+                        yMiddle += startY;
+                        ++numPixels;
                     }
                 }
+
                 // update the row
                 bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
             }
@@ -224,10 +231,12 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         // draw a circle at some position
         int pos = 50;
-        canvas.drawCircle(pos, 240, 5, paint1); // x position, y position, diameter, color
+        xMiddle /= numPixels;
+        yMiddle /= numPixels;
+        canvas.drawCircle(xMiddle, yMiddle, 5, paint1); // x position, y position, diameter, color
 
         // write the pos as text
-        canvas.drawText("pos = " + pos, 10, 200, paint1);
+        canvas.drawText("xpos = " + xMiddle + " ypos = " + yMiddle, 10, 200, paint1);
         c.drawBitmap(bmp, 0, 0, null);
         mSurfaceHolder.unlockCanvasAndPost(c);
 
