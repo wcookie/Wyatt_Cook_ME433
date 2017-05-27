@@ -7,6 +7,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -28,6 +29,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.WindowManager;
+import android.util.Log;
 
 
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
@@ -80,13 +82,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         fpsTextView = (TextView) findViewById(R.id.textView01);
         fpsTextView.setText("Hello Senior Lecturer Nicholas");
-        setMyControlListener();
+
         myTextView2 = (TextView) findViewById(R.id.textView02);
         myScrollView = (ScrollView) findViewById(R.id.ScrollView01);
         myTextView3 = (TextView) findViewById(R.id.textView03);
         button = (Button) findViewById(R.id.button1);
-
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, 1);
+        Log.w("Myapp", "Before requesting Permissions ");
+        //ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, 1);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             mSurfaceView = (SurfaceView) findViewById(R.id.surfaceview);
             mSurfaceHolder = mSurfaceView.getHolder();
@@ -99,9 +101,15 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             paint1.setTextSize(24);
 
             fpsTextView.setText("started camera");
+
+            Log.w("Myapp", "Started Camera");
         } else {
             fpsTextView.setText("no camera permissions");
+
+            Log.w("Myapp", "No camera :( ");
         }
+
+        Log.w("Myapp", "After checking Permissions ");
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,7 +120,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 } catch (IOException e) { }
             }
         });
+
         manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+
+        Log.w("Myapp", "After USB manager ");
+        setMyControlListener();
+
+        Log.w("Myapp", "After control listener ");
     }
     private void setMyControlListener() {
         myControl.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -121,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                Log.w("Myapp", "Progress change");
                 progressChanged = progress;
 
                 thresh = progress;
@@ -128,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
+
+                Log.w("Myapp", "Start touch tracking ");
             }
 
             @Override
@@ -135,6 +153,83 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
             }
         });
+    }
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+
+        Log.w("Myapp", "Surface texture available ");
+        mCamera = Camera.open();
+        Camera.Parameters parameters = mCamera.getParameters();
+        parameters.setPreviewSize(640, 480);
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); // no autofocusing
+        parameters.setAutoExposureLock(true); // keep the white balance constant
+        mCamera.setParameters(parameters);
+        mCamera.setDisplayOrientation(90); // rotate to portrait mode
+
+        try {
+            mCamera.setPreviewTexture(surface);
+            mCamera.startPreview();
+        } catch (IOException ioe) {
+            // Something bad happened
+
+            Log.w("Myapp", "Camera didnt' start preview");
+        }
+    }
+
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        // Ignored, Camera does all the work for us
+    }
+
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        mCamera.stopPreview();
+        mCamera.release();
+        return true;
+    }
+
+    // the important function
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        // every time there is a new Camera preview frame
+        mTextureView.getBitmap(bmp);
+
+        Log.w("Myapp", "Starting on Surface texture updated ");
+        final Canvas c = mSurfaceHolder.lockCanvas();
+        if (c != null) {
+            //int thresh = 0; // comparison value
+            int[] pixels = new int[bmp.getWidth()]; // pixels[] is the RGBA data
+            //int startY = 100; // which row in the bitmap to analyze to read
+            int rowGap = 5; // how many rowth to be at
+            // really should do like 0 to bmp.getHeight() at some point, but would probably have to raise row gap
+            for(int startY = 100; startY < 400; startY += rowGap) {
+                bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+
+                // in the row, see if there is more green than red
+                for (int i = 0; i < bmp.getWidth(); i++) {
+                    if ((green(pixels[i]) - red(pixels[i])) > thresh) {
+                        pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
+                    }
+                }
+                // update the row
+                bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+            }
+
+        }
+
+        // draw a circle at some position
+        int pos = 50;
+        canvas.drawCircle(pos, 240, 5, paint1); // x position, y position, diameter, color
+
+        // write the pos as text
+        canvas.drawText("pos = " + pos, 10, 200, paint1);
+        c.drawBitmap(bmp, 0, 0, null);
+        mSurfaceHolder.unlockCanvasAndPost(c);
+
+        // calculate the FPS to see how fast the code is running
+        long nowtime = System.currentTimeMillis();
+        long diff = nowtime - prevtime;
+        fpsTextView.setText("FPS " + 1000 / diff);
+        prevtime = nowtime;
+
+        Log.w("Myapp", "Got through surface update ");
     }
     private final SerialInputOutputManager.Listener mListener =
             new SerialInputOutputManager.Listener() {
@@ -245,73 +340,5 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             e.printStackTrace();
         }
     }
-    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        mCamera = Camera.open();
-        Camera.Parameters parameters = mCamera.getParameters();
-            parameters.setPreviewSize(640, 480);
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); // no autofocusing
-            parameters.setAutoExposureLock(true); // keep the white balance constant
-            mCamera.setParameters(parameters);
-            mCamera.setDisplayOrientation(90); // rotate to portrait mode
 
-            try {
-            mCamera.setPreviewTexture(surface);
-            mCamera.startPreview();
-        } catch (IOException ioe) {
-            // Something bad happened
-        }
-}
-
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        // Ignored, Camera does all the work for us
-    }
-
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        mCamera.stopPreview();
-        mCamera.release();
-        return true;
-    }
-
-    // the important function
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        // every time there is a new Camera preview frame
-        mTextureView.getBitmap(bmp);
-
-        final Canvas c = mSurfaceHolder.lockCanvas();
-        if (c != null) {
-            //int thresh = 0; // comparison value
-            int[] pixels = new int[bmp.getWidth()]; // pixels[] is the RGBA data
-            //int startY = 100; // which row in the bitmap to analyze to read
-            int rowGap = 5; // how many rowth to be at
-            // really should do like 0 to bmp.getHeight() at some point, but would probably have to raise row gap
-            for(int startY = 100; startY < 400; startY += rowGap) {
-                bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
-
-                // in the row, see if there is more green than red
-                for (int i = 0; i < bmp.getWidth(); i++) {
-                    if ((green(pixels[i]) - red(pixels[i])) > thresh) {
-                        pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
-                    }
-                }
-                // update the row
-                bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
-            }
-
-        }
-
-        // draw a circle at some position
-        int pos = 50;
-        canvas.drawCircle(pos, 240, 5, paint1); // x position, y position, diameter, color
-
-        // write the pos as text
-        canvas.drawText("pos = " + pos, 10, 200, paint1);
-        c.drawBitmap(bmp, 0, 0, null);
-        mSurfaceHolder.unlockCanvasAndPost(c);
-
-        // calculate the FPS to see how fast the code is running
-        long nowtime = System.currentTimeMillis();
-        long diff = nowtime - prevtime;
-        fpsTextView.setText("FPS " + 1000 / diff);
-        prevtime = nowtime;
-    }
 }
