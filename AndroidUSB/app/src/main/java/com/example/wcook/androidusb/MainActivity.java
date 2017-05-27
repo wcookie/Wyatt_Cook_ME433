@@ -49,6 +49,7 @@ import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
 import static android.graphics.Color.red;
 import static android.graphics.Color.rgb;
+import static java.lang.Math.abs;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener  {
     SeekBar myControl;
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 } catch (IOException e) { }
             }
         });
-
+        myControl.setMax(255);
         manager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
         Log.w("Myapp", "After USB manager ");
@@ -197,14 +198,21 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             //int thresh = 0; // comparison value
             int[] pixels = new int[bmp.getWidth()]; // pixels[] is the RGBA data
             //int startY = 100; // which row in the bitmap to analyze to read
-            int rowGap = 5; // how many rowth to be at
+            int rowGap = 7; // how many rowth to be at
+            int colGap = 2;
             // really should do like 0 to bmp.getHeight() at some point, but would probably have to raise row gap
-            for(int startY = 100; startY < 400; startY += rowGap) {
+            for(int startY = 0; startY < bmp.getHeight(); startY += rowGap) {
                 bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
 
                 // in the row, see if there is more green than red
-                for (int i = 0; i < bmp.getWidth(); i++) {
-                    if ((green(pixels[i]) - red(pixels[i])) > thresh) {
+                for (int i = 0; i < bmp.getWidth(); i+= colGap) {
+                    double avg = (green (pixels[i]) + red(pixels[i]) + blue(pixels[i])) / 3.0;
+                    int sum =0 ;
+                    sum += abs(green(pixels[i]) - avg);
+                    sum += abs(red(pixels[i]) - avg);
+                    sum += abs(blue(pixels[i]) - avg);
+                    //if ((green(pixels[i]) - red(pixels[i])) > thresh) {
+                    if (sum <= thresh){
                         pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
                     }
                 }
