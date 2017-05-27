@@ -48,4 +48,13 @@
             android:background="@android:color/holo_green_light"
             />
     </ScrollView>
+    <SurfaceView
+        android:id="@+id/surfaceview"
+        android:layout_width="640px"
+        android:layout_height="480px" />
+
+    <TextureView
+        android:id="@+id/textureview"
+        android:layout_width="640px"
+        android:layout_height="480px" />
 </LinearLayout>
