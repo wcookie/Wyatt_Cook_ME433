@@ -78,7 +78,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #pragma config WDTPS =      PS1048576
 #pragma config FWDTEN =     OFF
 #pragma config WINDIS =     OFF
-#pragma config FWDTWINSZ =  WINSZ_50
+#pragma config FWDTWINSZ =  WINSZ_25
 /*** DEVCFG2 ***/
 
 #pragma config FPLLIDIV =   DIV_2
@@ -88,7 +88,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #pragma config UPLLEN =     ON
 /*** DEVCFG3 ***/
 
-#pragma config USERID =     0xffff
+#pragma config USERID =     0x0000
 #pragma config PMDL1WAY =   OFF
 #pragma config IOL1WAY =    OFF
 #pragma config FUSBIDIO =   ON
