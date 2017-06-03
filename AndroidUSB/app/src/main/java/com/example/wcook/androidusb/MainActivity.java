@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         canvas.drawText("xpos = " + xMiddle + " ypos = " + yMiddle, 10, 200, paint1);
         float xDiff = (bmp.getWidth() / 2)  - xMiddle;
         float yDiff = (bmp.getHeight() / 2) - yMiddle;
-        float pwmDiff = xDiff * xWeight + yDiff * yWeight;
+        int pwmDiff = (int)(xDiff * xWeight + yDiff * yWeight);
         String usbSend = String.valueOf(pwmDiff) + '\n';
         try {
             sPort.write(usbSend.getBytes(), 100);
