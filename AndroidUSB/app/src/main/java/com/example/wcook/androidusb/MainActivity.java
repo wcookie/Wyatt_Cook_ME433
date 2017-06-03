@@ -69,8 +69,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     public int thresh = 0;
 
 
-    public float xWeight = 5;
-    public float yWeight = 2;
+    public double xWeight = 1.0;
+    public double yWeight = .02;
     static long prevtime = 0; // for FPS calculation
     private UsbManager manager;
     private UsbSerialPort sPort;
@@ -118,10 +118,10 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             @Override
             public void onClick(View v) {
                 myTextView2.setText("value on click is "+myControl.getProgress());
-                String sendString = String.valueOf(myControl.getProgress()) + '\n';
+                /*String sendString = String.valueOf(myControl.getProgress()) + '\n';
                 try {
                     sPort.write(sendString.getBytes(), 10); // 10 is the timeout
-                } catch (IOException e) { }
+                } catch (IOException e) { }*/
             }
         });
         myControl.setMax(100); // maybe 255 is better? consider changing
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     sum += abs(red(pixels[i]) - avg);
                     sum += abs(blue(pixels[i]) - avg);
                     //if ((green(pixels[i]) - red(pixels[i])) > thresh) {
-                    if (sum <= thresh && (red(pixels[i]) > 150)){
+                    if (sum <= thresh && (red(pixels[i]) > 100) && ((green(pixels[i]) + red(pixels[i]) + blue(pixels[i])) < 740)){
                         pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
                         xMiddle += i;
                         yMiddle += startY;
@@ -240,16 +240,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         // write the pos as text
         canvas.drawText("xpos = " + xMiddle + " ypos = " + yMiddle, 10, 200, paint1);
-        float xDiff = (bmp.getWidth() / 2)  - xMiddle;
-        float yDiff = (bmp.getHeight() / 2) - yMiddle;
+        double xDiff = (bmp.getWidth() / 2)  - xMiddle;
+        double yDiff = (bmp.getHeight() / 2) - yMiddle;
         int pwmDiff = (int)(xDiff * xWeight + yDiff * yWeight);
         String usbSend = String.valueOf(pwmDiff) + '\n';
-        /*try {
-            sPort.write(usbSend.getBytes(), 100);
-        }
-        catch(IOException e ) {
-            //Whoops
-        }*/
+
+       try {
+            sPort.write(usbSend.getBytes(), 10); // 10 is the timeout
+        } catch (IOException e) { }
         c.drawBitmap(bmp, 0, 0, null);
         mSurfaceHolder.unlockCanvasAndPost(c);
 

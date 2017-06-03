@@ -67,10 +67,16 @@ uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
 int startTime = 0;
+
 char rx[64]; // the raw data
 int rxPos = 0; // how much data has been stored
 int gotRx = 0; // the flag
 int rxVal = 0; // a place to store the int that was received
+int neutralPower = 600;
+            int leftPwm = 0; // left is A1 / OC1RS
+            int leftDirection = 0;
+            int rightPwm = 0; // right is B3 / OC4RS
+            int rightDirection = 1;
 // *****************************************************************************
 /* Application Data
 
@@ -96,51 +102,6 @@ APP_DATA appData;
 
 /* TODO:  Add any necessary callback functions.
  */
-
-
-void init_IMU(){
-  ANSELBbits.ANSB2 = 0;
-  ANSELBbits.ANSB3 = 0;
-   __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
-
-    // 0 data RAM access wait states
-    BMXCONbits.BMXWSDRM = 0x0;
-
-    // enable multi vector interrupts
-    INTCONbits.MVEC = 0x1;
-
-    // disable JTAG to get pins back
-    DDPCONbits.JTAGEN = 0;
-  i2c_master_setup();                       // init I2C2, which we use as a master
-  __builtin_enable_interrupts(); 
-    char CTRL1_XL = 0b10000010;
-    char CTRL2_G = 0b1000100;
-    char CTRL3_C = 0b00000100;
-    //accelerometer
-    i2c_master_start();
-    i2c_master_send(SLAVE_ADDR<<1);
-    i2c_master_send(0x10);
-    i2c_master_send(CTRL1_XL);
-    i2c_master_stop();
-    //gyro
-    i2c_master_start();
-    i2c_master_send(SLAVE_ADDR<<1);
-    i2c_master_send(0x11);
-    i2c_master_send(CTRL2_G);
-    i2c_master_stop();
-    //multi read
-    i2c_master_start();
-    i2c_master_send(SLAVE_ADDR<<1);
-    i2c_master_send(0x12);
-    i2c_master_send(CTRL3_C);
-    i2c_master_stop();
-}
-
-short combineNums(char * data, char index){
-    short ret = data[index + 1] << 8;
-    ret |= data[index];
-    return ret;
-}
 
 /*******************************************************
  * USB CDC Device Events - Application Event Handler
@@ -389,6 +350,25 @@ void APP_Initialize(void) {
     appData.readBuffer = &readBuffer[0];
 
     startTime = _CP0_GET_COUNT();
+       RPA0Rbits.RPA0R = 0b0101; // A0 is OC1
+    TRISAbits.TRISA1 = 0;
+    LATAbits.LATA1 = 0; // A1 is the direction pin to go along with OC1
+
+    RPB2Rbits.RPB2R = 0b0101; // B2 is OC4
+    TRISBbits.TRISB3 = 0;
+    LATBbits.LATB3 = 0; // B3 is the direction pin to go along with OC4
+        T2CONbits.TCKPS = 2; // prescaler N=4 
+    PR2 = 1200 - 1; // 10kHz
+    TMR2 = 0;
+    OC1CONbits.OCM = 0b110; // PWM mode without fault pin; other OC1CON bits are defaults
+    OC4CONbits.OCM = 0b110;
+    OC1RS = 0; // max allowed value is 1119
+    OC1R = 0; // read-only initial value
+    OC4RS = 0; // max allowed value is 1119
+    OC4R = 0; // read-only initial value
+    T2CONbits.ON = 1;
+    OC1CONbits.ON = 1;
+    OC4CONbits.ON = 1;
 }
 
 /******************************************************************************
@@ -402,31 +382,10 @@ void APP_Initialize(void) {
 void APP_Tasks(void) {
     /* Update the application state machine based
      * on the current state */
-    char data[14];
-    short temp;
-    short gyro_x;
-    short gyro_y;
-    short gyro_z;
-    short accel_x;
-    short accel_y;
-    short accel_z;
-    char var;
-    
+
     switch (appData.state) {
         case APP_STATE_INIT:
 
-             init_IMU();
-            i2c_master_start();
-           i2c_master_send(SLAVE_ADDR << 1);
-           i2c_master_send(0xF);
-           i2c_master_restart();
-           i2c_master_send((SLAVE_ADDR << 1) | 1);
-           var = i2c_master_recv();
-           i2c_master_ack(1);
-           i2c_master_stop();
-
-
-    _CP0_SET_COUNT(0);
             /* Open the device layer */
             appData.deviceHandle = USB_DEVICE_Open(USB_DEVICE_INDEX_0, DRV_IO_INTENT_READWRITE);
 
@@ -459,24 +418,21 @@ void APP_Tasks(void) {
 
             /* If a read is complete, then schedule a read
              * else wait for the current read to complete */
-             
+                 // LATAbits.LATA1 = 1; // direction
+               /* OC1RS = 1200; // velocity, 50%
+                LATBbits.LATB3 = 0; // direction
+                OC4RS = 1200; // velocity, 50%
+                * */
             appData.state = APP_STATE_WAIT_FOR_READ_COMPLETE;
-           
             if (appData.isReadComplete == true) {
                 appData.isReadComplete = false;
                 appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
-
+                
                 USB_DEVICE_CDC_Read(USB_DEVICE_CDC_INDEX_0,
                         &appData.readTransferHandle, appData.readBuffer,
                         APP_READ_BUFFER_SIZE);
-            
-                /*
-                if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
-                    appData.state = APP_STATE_ERROR;
-                    break;
-                }
-            }*/
-                 int ii = 0;
+                
+                                int ii = 0;
                 // loop thru the characters in the buffer
                 while (appData.readBuffer[ii] != 0) {
                     // if you got a newline
@@ -494,7 +450,38 @@ void APP_Tasks(void) {
                         ii++;
                     }
                 }
-                 }
+                       
+      
+                if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
+                    appData.state = APP_STATE_ERROR;
+                    break;
+                }
+            }
+
+            
+            if (gotRx){
+                LATBbits.LATB3 = leftDirection; // direction
+                LATAbits.LATA1 = rightDirection; // direction
+                leftPwm = neutralPower - (rxVal );
+                rightPwm = neutralPower + (rxVal );
+                if (rxVal > 75){
+                    leftPwm = 350;
+                    LATBbits.LATB3 = !leftDirection;
+                    
+                }
+                else if (rxVal < -75){
+                    rightPwm = 350;
+                    LATAbits.LATA1 = !rightDirection;
+                }
+                // def need something here to check when to bring one negative
+                // perhaps if rxVal > thresh?
+
+            OC1RS = rightPwm; // velocity, 50%
+  
+            OC4RS = leftPwm; // velocity, 50%
+            }
+            
+
 
             break;
 
@@ -508,7 +495,7 @@ void APP_Tasks(void) {
             /* Check if a character was received or a switch was pressed.
              * The isReadComplete flag gets updated in the CDC event handler. */
 
-                if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
+            if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
 
@@ -522,13 +509,11 @@ void APP_Tasks(void) {
             }
 
             /* Setup the write */
-             //appData.readBuffer is the char
-           
+
             appData.writeTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
             appData.isWriteComplete = false;
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
 
-           
             if (gotRx) {
                 len = sprintf(dataOut, "got: %d\r\n", rxVal);
                 i++;
