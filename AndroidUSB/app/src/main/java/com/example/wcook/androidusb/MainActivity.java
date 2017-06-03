@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                     sum += abs(red(pixels[i]) - avg);
                     sum += abs(blue(pixels[i]) - avg);
                     //if ((green(pixels[i]) - red(pixels[i])) > thresh) {
-                    if (sum <= thresh){
+                    if (sum <= thresh && (red(pixels[i]) > 150)){
                         pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
                         xMiddle += i;
                         yMiddle += startY;
@@ -244,19 +244,20 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
         float yDiff = (bmp.getHeight() / 2) - yMiddle;
         int pwmDiff = (int)(xDiff * xWeight + yDiff * yWeight);
         String usbSend = String.valueOf(pwmDiff) + '\n';
-        try {
+        /*try {
             sPort.write(usbSend.getBytes(), 100);
         }
         catch(IOException e ) {
             //Whoops
-        }
+        }*/
         c.drawBitmap(bmp, 0, 0, null);
         mSurfaceHolder.unlockCanvasAndPost(c);
 
         // calculate the FPS to see how fast the code is running
         long nowtime = System.currentTimeMillis();
         long diff = nowtime - prevtime;
-        fpsTextView.setText("FPS " + 1000 / diff);
+        //fpsTextView.setText("FPS " + 1000 / diff);
+        fpsTextView.setText(usbSend);
         prevtime = nowtime;
 
         Log.w("Myapp", "Got through surface update ");
