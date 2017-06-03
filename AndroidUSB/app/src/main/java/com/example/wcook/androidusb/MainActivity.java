@@ -68,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
     private TextView fpsTextView;
     public int thresh = 0;
 
+
+    public float xWeight = 5;
+    public float yWeight = 2;
     static long prevtime = 0; // for FPS calculation
     private UsbManager manager;
     private UsbSerialPort sPort;
@@ -204,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             int colGap = 2;
             // really should do like 0 to bmp.getHeight() at some point, but would probably have to raise row gap
 
-            for(int startY = 0; startY < bmp.getHeight(); startY += rowGap) {
+            for(int startY = 0; startY < bmp.getHeight() / 2 ; startY += rowGap) {
                 bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
 
                 // in the row, see if there is more green than red
@@ -237,6 +240,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
         // write the pos as text
         canvas.drawText("xpos = " + xMiddle + " ypos = " + yMiddle, 10, 200, paint1);
+        float xDiff = (bmp.getWidth() / 2)  - xMiddle;
+        float yDiff = (bmp.getHeight() / 2) - yMiddle;
+        float pwmDiff = xDiff * xWeight + yDiff * yWeight;
+        String usbSend = String.valueOf(pwmDiff) + '\n';
+        try {
+            sPort.write(usbSend.getBytes(), 100);
+        }
+        catch(IOException e ) {
+            //Whoops
+        }
         c.drawBitmap(bmp, 0, 0, null);
         mSurfaceHolder.unlockCanvasAndPost(c);
 
